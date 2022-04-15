@@ -66,8 +66,8 @@ func inverse(n, prime uint64) uint64 {
 
 	for r != 0 {
 		quotient := old_r / r
-		old_r, r = r, sub64Mod(old_r, quotient*r, prime)
-		old_s, s = s, sub64Mod(old_s, quotient*s, prime)
+		old_r, r = r, sub64Mod(old_r, mult64Mod(quotient, r, prime), prime)
+		old_s, s = s, sub64Mod(old_s, mult64Mod(quotient, s, prime), prime)
 		// old_t, t = t, sub64Mod(old_t, quotient*t, prime)
 	}
 

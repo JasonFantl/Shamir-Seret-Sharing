@@ -6,25 +6,18 @@ import (
 
 func main() {
 
-	// var prime uint64 = math.MaxUint64 - 58 // https://primes.utm.edu/lists/2small/0bit.html
-	// fmt.Println(prime)
-	var prime uint64 = 67
+	requiredShareCount := uint(6)
+	secret := "this is my secret"
 
-	// poly := PolynomialField{[]uint64{5, 55, 10}, prime}
-	// poly2 := PolynomialField{[]uint64{50, 2, 62}, prime}
+	encodedPolynomial := encodeSecret([]byte(secret), requiredShareCount)
 
-	fmt.Println(inverse(60, prime))
-	// https://www.desmos.com/calculator/2fn27pdvuy
-	points := []Point{{0, 5}, {1, 6}, {3, 10}, {7, 88}}
-	interpolated := lagrangeInterpolate(points, prime)
-	fmt.Println(interpolated)
-	fmt.Println(lagrangeInterpolate([]Point{interpolated.eval(5), interpolated.eval(10), interpolated.eval(30), interpolated.eval(90)}, interpolated.prime))
+	shares := make([]Point, requiredShareCount+2)
+	for i := 0; i < len(shares); i++ {
+		// make sure not to let a share be at x=0 as that gives the first 8 bytes of the secret
+		shares[i] = encodedPolynomial.eval(uint64(i + 2))
+	}
 
-	// why does the above work, but not the below? is it because of overflow?
-	encoded := encodeSecret([]byte("hi"), 3)
-	fmt.Println(encoded)
-	shares := []Point{encoded.eval(0), encoded.eval(1), encoded.eval(10)}
-	decoded := lagrangeInterpolate(shares, encoded.prime)
+	decoded := decodeSecret(shares, requiredShareCount)
 	fmt.Println(decoded)
-
+	fmt.Println(string(decoded))
 }

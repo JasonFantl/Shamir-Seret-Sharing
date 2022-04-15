@@ -68,9 +68,12 @@ func (polynomial1 PolynomialField) mult(polynomial2 PolynomialField) PolynomialF
 	resultPolynomial := PolynomialField{make([]uint64, length), polynomial1.prime}
 	for i := 0; i < len(polynomial1.coefficients); i++ {
 		for j := 0; j < len(polynomial2.coefficients); j++ {
-			resultPolynomial.coefficients[i+j] += mult64Mod(
-				polynomial1.coefficients[i],
-				polynomial2.coefficients[j],
+			resultPolynomial.coefficients[i+j] = add64Mod(
+				resultPolynomial.coefficients[i+j],
+				mult64Mod(
+					polynomial1.coefficients[i],
+					polynomial2.coefficients[j],
+					resultPolynomial.prime),
 				resultPolynomial.prime)
 		}
 	}
