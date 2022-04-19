@@ -1,4 +1,4 @@
-package main
+package shamir
 
 func maxInt(n, m int) int {
 	if n < m {

@@ -1,4 +1,4 @@
-package main
+package shamir
 
 import "fmt"
 
@@ -140,7 +140,7 @@ func lagrangeInterpolate(points []Point, prime uint64) PolynomialField {
 				continue
 			}
 			frac := PolynomialField{[]uint64{sub64Mod(0, points[j].x, prime), 1}, prime}
-			frac = frac.scale(inverse(sub64Mod(points[i].x, points[j].x, prime), prime))
+			frac = frac.scale(inverse64Mod(sub64Mod(points[i].x, points[j].x, prime), prime))
 			product = product.mult(frac)
 		}
 		product = product.scale(points[i].y)

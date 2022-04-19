@@ -1,3 +1,3 @@
-module main
+module github.com/jasonfantl/secretSharing
 
-go 1.17
+go 1.18

@@ -1,4 +1,4 @@
-package main
+package shamir
 
 import (
 	"fmt"
@@ -17,15 +17,7 @@ func add64Mod(left, right, prime uint64) uint64 {
 }
 
 func sub64Mod(left, right, prime uint64) uint64 {
-	// this makes the next steps easier
-	left %= prime
-	right %= prime
-
-	if left < right { // overflow
-		return prime - (right - left) // we know (right-left < prime), so this is safe
-	}
-
-	return left - right
+	return add64Mod(left, neg64Mod(right, prime), prime)
 }
 
 // https://www.geeksforgeeks.org/how-to-avoid-overflow-in-modular-multiplication/
@@ -54,11 +46,15 @@ func div64Mod(left, right, prime uint64) uint64 {
 		return 0
 	}
 
-	return mult64Mod(left, inverse(right, prime), prime)
+	return mult64Mod(left, inverse64Mod(right, prime), prime)
+}
+
+func neg64Mod(n, prime uint64) uint64 {
+	return prime - (n % prime)
 }
 
 // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-func inverse(n, prime uint64) uint64 {
+func inverse64Mod(n, prime uint64) uint64 {
 	n %= prime
 	var old_r, r uint64 = n, prime
 	var old_s, s uint64 = 1, 0
