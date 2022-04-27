@@ -25,10 +25,14 @@ func NewSecretSharing(secret []byte, requiredShareCount int) (SecretSharing, err
 	}, nil
 }
 
-func (s *SecretSharing) GenerateShare() Point {
+func (s *SecretSharing) GenerateShare() Share {
 	share := s.polynomial.eval(uint64(s.counter))
 	s.counter++
 	return share
+}
+
+func (s *SecretSharing) GenerateShareAt(x int) Share {
+	return s.polynomial.eval(uint64(x))
 }
 
 func encodeSecret(bytes []byte, requiredShareCount uint) (PolynomialField, error) {
@@ -42,7 +46,7 @@ func encodeSecret(bytes []byte, requiredShareCount uint) (PolynomialField, error
 	coefficients := make([]uint64, requiredShareCount)
 	// first fill the coefficients with non-zero values, then we will overwrite with our own
 	for i := uint(0); i < requiredShareCount; i++ {
-		coefficients[i] = '#'
+		coefficients[i] = 1
 	}
 
 	for i := uint(0); i < neededCoefficients-1; i++ {
@@ -59,7 +63,7 @@ func encodeSecret(bytes []byte, requiredShareCount uint) (PolynomialField, error
 	return PolynomialField{coefficients, prime}, nil
 }
 
-func DecodeSecret(shares []Point, degree int) ([]byte, error) {
+func DecodeSecret(shares []Share, degree int) ([]byte, error) {
 	// make sure the provided information is valid
 	if len(shares) < degree {
 		return nil, fmt.Errorf("not enough shares to decode")
@@ -69,7 +73,7 @@ func DecodeSecret(shares []Point, degree int) ([]byte, error) {
 			if i == j {
 				continue
 			}
-			if share1.x == share2.x {
+			if share1.X == share2.X {
 				return nil, fmt.Errorf("shares must be distinct")
 			}
 		}

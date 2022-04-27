@@ -2,8 +2,8 @@ package shamir
 
 import "fmt"
 
-type Point struct {
-	x, y uint64
+type Share struct {
+	X, Y uint64
 }
 
 type PolynomialField struct {
@@ -91,19 +91,19 @@ func (polynomial PolynomialField) scale(s uint64) PolynomialField {
 	return resultPolynomial
 }
 
-func (polynomial PolynomialField) eval(x uint64) Point {
+func (polynomial PolynomialField) eval(x uint64) Share {
 	// Horner's method
 	degree := len(polynomial.coefficients) - 1
 	y := polynomial.coefficients[degree]
 	for i := degree - 1; i >= 0; i-- {
 		y = add64Mod(mult64Mod(y, x, polynomial.prime), polynomial.coefficients[i], polynomial.prime)
 	}
-	return Point{x, y}
+	return Share{x, y}
 }
 
 // make sure the number of points is = degree(polynomial) + 1,
 // more will give an incorrect answer.
-func lagrangeInterpolateEval(points []Point, x, prime uint64) Point {
+func lagrangeInterpolateEval(points []Share, x, prime uint64) Share {
 	n := len(points)
 	var sum uint64 = 0
 	for i := 0; i < n; i++ {
@@ -115,22 +115,22 @@ func lagrangeInterpolateEval(points []Point, x, prime uint64) Point {
 			product = mult64Mod(
 				product,
 				div64Mod(
-					sub64Mod(x, points[j].x, prime),
-					sub64Mod(points[i].x, points[j].x, prime),
+					sub64Mod(x, points[j].X, prime),
+					sub64Mod(points[i].X, points[j].X, prime),
 					prime),
 				prime)
 		}
 
 		sum = add64Mod(
 			sum,
-			mult64Mod(product, points[i].y, prime),
+			mult64Mod(product, points[i].Y, prime),
 			prime)
 	}
 
-	return Point{x, sum}
+	return Share{x, sum}
 }
 
-func lagrangeInterpolate(points []Point, prime uint64) PolynomialField {
+func lagrangeInterpolate(points []Share, prime uint64) PolynomialField {
 	n := len(points)
 	sum := PolynomialField{make([]uint64, 0), prime}
 	for i := 0; i < n; i++ {
@@ -139,11 +139,11 @@ func lagrangeInterpolate(points []Point, prime uint64) PolynomialField {
 			if j == i {
 				continue
 			}
-			frac := PolynomialField{[]uint64{sub64Mod(0, points[j].x, prime), 1}, prime}
-			frac = frac.scale(inverse64Mod(sub64Mod(points[i].x, points[j].x, prime), prime))
+			frac := PolynomialField{[]uint64{sub64Mod(0, points[j].X, prime), 1}, prime}
+			frac = frac.scale(inverse64Mod(sub64Mod(points[i].X, points[j].X, prime), prime))
 			product = product.mult(frac)
 		}
-		product = product.scale(points[i].y)
+		product = product.scale(points[i].Y)
 		sum = sum.add(product)
 	}
 
